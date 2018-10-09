@@ -27,7 +27,7 @@ RUN set -x \
       /src/tmpl \
       /certs \
       /out \
- && cp /src/lang/*.mo /out/lang/
+ && cp /src/lang/*.po /out/lang/
 
 # Create the minimal image
 FROM scratch

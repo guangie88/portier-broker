@@ -52,7 +52,7 @@ script:
         else
             cargo build --verbose
             cargo test --verbose
-            cargo install clippy && cargo clippy -- -Dclippy
+            rustup component add clippy-preview && cargo clippy -- -Dclippy
         fi
     - |
         if [ "$PUBLISH" = "true" ]; then

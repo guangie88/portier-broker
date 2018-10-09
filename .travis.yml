@@ -54,10 +54,6 @@ script:
             cargo test --verbose
             rustup component add clippy-preview && cargo clippy -- -Dclippy
         fi
-    - |
-        if [ "$PUBLISH" = "true" ]; then
-            docker build -t $IMAGE_NAME .
-        fi
 
 after_success:
     - |

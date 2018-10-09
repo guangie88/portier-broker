@@ -5,10 +5,17 @@ matrix:
         - rust: stable
         - rust: beta
         - rust: nightly
+        - services: docker
+          env: PUBLISH=true
     allow_failures:
         - rust: beta
         - rust: nightly
     fast_finish: true
+
+env:
+    global:
+        - PROJECT_NAME=portier-broker
+        - IMAGE_NAME=$DOCKER_USERNAME/$PROJECT_NAME
 
 # kcov setup
 #
@@ -31,13 +38,38 @@ matrix:
 #       cargo install --force cargo-travis &&
 #       export PATH=$HOME/.cargo/bin:$PATH
 
-script:
-    - cargo build --verbose
-    - cargo test --verbose
+before_script:
+    - set -e
     - |
-        if [ $TRAVIS_RUST_VERSION == "nightly" ]; then
-            cargo install clippy && cargo clippy -- -Dclippy
+        if [ "$PUBLISH" = "true" ]; then
+            docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
         fi
+
+script:
+    - |
+        if [ "$PUBLISH" = "true" ]; then
+            docker build -t $IMAGE_NAME .
+        else
+            cargo build --verbose
+            cargo test --verbose
+            rustup component add clippy-preview && cargo clippy -- -Dclippy
+        fi
+
+after_success:
+    - |
+        if [ "$PUBLISH" = "true" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+            docker push $IMAGE_NAME
+
+            if [ -n "$TRAVIS_TAG" ]; then
+                docker tag $IMAGE_NAME $IMAGE_NAME:$TRAVIS_TAG
+                docker push $IMAGE_NAME:$TRAVIS_TAG
+            fi
+        fi
+
+branches:
+  only:
+  - master
+  - docker-build
 
 # after_success:
 #     - cargo coveralls

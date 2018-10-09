@@ -46,10 +46,12 @@ before_script:
         fi
 
 script:
-    - cargo build --verbose
-    - cargo test --verbose
     - |
-        if [ $TRAVIS_RUST_VERSION == "nightly" ]; then
+        if [ "$PUBLISH" = "true" ]; then
+            docker build -t $IMAGE_NAME .
+        else
+            cargo build --verbose
+            cargo test --verbose
             cargo install clippy && cargo clippy -- -Dclippy
         fi
     - |

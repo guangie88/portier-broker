@@ -114,7 +114,7 @@ pub struct Templates {
 impl Templates {
     fn compile_template(path: &str) -> Template {
         Template(mustache::compile_path(path)
-                 .expect(&format!("unable to compile template at: {}", path)))
+                 .unwrap_or_else(|_| panic!("unable to compile template at: {}", path)))
     }
 }
 
